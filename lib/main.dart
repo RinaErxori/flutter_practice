@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Практическая работа №4',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const Mainscreen(),
+      home: const MainScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
