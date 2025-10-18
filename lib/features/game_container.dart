@@ -1,50 +1,59 @@
+import './models/Game.dart';
 import 'package:flutter/material.dart';
-import '../models/Game.dart';
-import '../widgets/GameCard.dart';
-import 'AddEditGameScreen.dart';
-import 'GameDetailScreen.dart';
+import './screens/AddEditGameScreen.dart';
+import './screens/GameDetailScreen.dart';
+import './widgets/GameCard.dart';
 
-class GameListScreen extends StatefulWidget {
+class GameContainer extends StatefulWidget {
+  const GameContainer({Key? key}) : super(key: key);
+
   @override
-  State<GameListScreen> createState() => _GameListScreenState();
+  State<GameContainer> createState() => _GameContainerState();
 }
 
-class _GameListScreenState extends State<GameListScreen>
+class _GameContainerState extends State<GameContainer>
     with SingleTickerProviderStateMixin {
-  List<Game> _games = [];
-  late TabController _tabs;
-  final statuses = ['Все', 'Хочу пройти', 'Играю', 'Пройдено'];
+  final List<String> statuses = const ['Все', 'Хочу пройти', 'Играю', 'Пройдено'];
+  late final TabController _tabs;
+  final List<Game> _games = [
+    Game(
+      id: '1',
+      title: 'Hollow Knight',
+      genre: 'Metroidvania',
+      status: 'Пройдено',
+      rating: 9.5,
+      comment: 'Атмосферно и сложно!',
+    ),
+    Game(
+      id: '2',
+      title: 'Elden Ring',
+      genre: 'Action RPG',
+      status: 'Играю',
+    ),
+    Game(
+      id: '3',
+      title: 'The Witcher 3',
+      genre: 'RPG',
+      status: 'Хочу пройти',
+    ),
+  ];
 
   @override
   void initState() {
     super.initState();
     _tabs = TabController(length: statuses.length, vsync: this);
-    _games = [
-      Game(
-        id: '1',
-        title: 'Hollow Knight',
-        genre: 'Metroidvania',
-        status: 'Пройдено',
-        rating: 9.5,
-        comment: 'Атмосферно и сложно!',
-      ),
-      Game(
-        id: '2',
-        title: 'Elden Ring',
-        genre: 'Action RPG',
-        status: 'Играю',
-      ),
-      Game(
-        id: '3',
-        title: 'The Witcher 3',
-        genre: 'RPG',
-        status: 'Хочу пройти',
-      ),
-    ];
   }
 
-  List<Game> _filtered(String status) =>
-      status == 'Все' ? _games : _games.where((g) => g.status == status).toList();
+  @override
+  void dispose() {
+    _tabs.dispose();
+    super.dispose();
+  }
+
+  List<Game> _filtered(String status) {
+    if (status == 'Все') return _games;
+    return _games.where((g) => g.status == status).toList();
+  }
 
   void _delete(Game game) {
     setState(() => _games.removeWhere((g) => g.id == game.id));
@@ -80,7 +89,7 @@ class _GameListScreenState extends State<GameListScreen>
     }
   }
 
-  void _detail(Game game) async {
+  Future<void> _detail(Game game) async {
     final action = await Navigator.push<String?>(
       context,
       MaterialPageRoute(builder: (_) => GameDetailScreen(game: game)),
@@ -117,8 +126,8 @@ class _GameListScreenState extends State<GameListScreen>
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _add,
-        child: const Icon(Icons.add),
         tooltip: 'Добавить игру',
+        child: const Icon(Icons.add),
       ),
     );
   }

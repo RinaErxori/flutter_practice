@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'features/screens/GameListScreen.dart';
+import 'features/games/screens/GameListScreen.dart';
 
 void main() {
-  runApp(GameTrackerApp());
+  runApp(const GameTrackerApp());
 }
 
 class GameTrackerApp extends StatelessWidget {
+  const GameTrackerApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -14,7 +16,7 @@ class GameTrackerApp extends StatelessWidget {
         primarySwatch: Colors.deepPurple,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: GameListScreen(),
+      home: const GameListScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
