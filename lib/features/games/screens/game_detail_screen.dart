@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/Game.dart';
+import '../models/game.dart';
 
 class GameDetailScreen extends StatelessWidget {
   final Game game;

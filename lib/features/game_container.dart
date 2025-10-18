@@ -1,8 +1,8 @@
-import './models/Game.dart';
+import './models/game.dart';
 import 'package:flutter/material.dart';
-import './screens/AddEditGameScreen.dart';
-import './screens/GameDetailScreen.dart';
-import './widgets/GameCard.dart';
+import './screens/add_edit_game_screen.dart';
+import './screens/game_detail_screen.dart';
+import './widgets/game_card.dart';
 
 class GameContainer extends StatefulWidget {
   const GameContainer({Key? key}) : super(key: key);

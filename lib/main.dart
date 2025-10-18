@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'features/games/screens/GameListScreen.dart';
+import 'features/games/screens/game_list_screen.dart';
 
 void main() {
   runApp(const GameTrackerApp());
