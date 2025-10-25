@@ -1,72 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../models/game.dart';
 
 class GameDetailScreen extends StatelessWidget {
   final Game game;
-  const GameDetailScreen({required this.game});
+  const GameDetailScreen({super.key, required this.game});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(game.title),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () async {
-              final confirm = await showDialog<bool>(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  title: const Text('Удалить игру'),
-                  content:
-                  Text('Вы уверены, что хотите удалить "${game.title}"?'),
-                  actions: [
-                    TextButton(
-                        onPressed: () => Navigator.pop(ctx, false),
-                        child: const Text('Отмена')),
-                    ElevatedButton(
-                        onPressed: () => Navigator.pop(ctx, true),
-                        child: const Text('Удалить')),
-                  ],
-                ),
-              );
-              if (confirm == true) Navigator.pop(context, 'delete');
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () => Navigator.pop(context, 'edit'),
-          ),
-        ],
-      ),
-      body: Padding(
+      appBar: AppBar(title: Text(game.title)),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(game.title, style: Theme.of(context).textTheme.headlineMedium),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(Icons.category, size: 18),
-                const SizedBox(width: 6),
-                Text(game.genre),
-                const SizedBox(width: 16),
-                const Icon(Icons.info_outline, size: 18),
-                const SizedBox(width: 6),
-                Text(game.status),
-              ],
-            ),
-            const SizedBox(height: 12),
+            if (game.imageUrl != null && game.imageUrl!.isNotEmpty)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: CachedNetworkImage(
+                  imageUrl: game.imageUrl!,
+                  height: 220,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            const SizedBox(height: 16),
+            Text('Жанр: ${game.genre}'),
+            Text('Статус: ${game.status}'),
             if (game.rating != null)
-              Text('Рейтинг: ${game.rating!.toStringAsFixed(1)}',
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
+              Text('Рейтинг: ${game.rating!.toStringAsFixed(1)}'),
             if (game.comment != null && game.comment!.isNotEmpty) ...[
-              const Text('Комментарий:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 6),
-              Text(game.comment!),
+              const SizedBox(height: 12),
+              Text('Комментарий: ${game.comment!}'),
             ],
           ],
         ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../models/game.dart';
 
 class GameCard extends StatelessWidget {
@@ -7,50 +8,44 @@ class GameCard extends StatelessWidget {
   final VoidCallback onDelete;
 
   const GameCard({
+    super.key,
     required this.game,
     required this.onTap,
     required this.onDelete,
   });
 
-  Color _statusColor(String status) {
-    switch (status) {
-      case 'Пройдено':
-        return Colors.green;
-      case 'Играю':
-        return Colors.orange;
-      default:
-        return Colors.blueGrey;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Dismissible(
-      key: Key(game.id),
-      direction: DismissDirection.endToStart,
-      background: Container(
-        alignment: Alignment.centerRight,
-        color: Colors.red,
-        padding: const EdgeInsets.only(right: 16),
-        child: const Icon(Icons.delete, color: Colors.white),
+    final hasImage = game.imageUrl != null && game.imageUrl!.isNotEmpty;
+    final leading = hasImage
+        ? ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: CachedNetworkImage(
+        imageUrl: game.imageUrl!,
+        width: 56,
+        height: 56,
+        fit: BoxFit.cover,
+        placeholder: (c, _) => Container(
+          width: 56,
+          height: 56,
+          color: Colors.grey.shade200,
+          alignment: Alignment.center,
+          child: const CircularProgressIndicator(strokeWidth: 2),
+        ),
+        errorWidget: (c, _, __) => const Icon(Icons.broken_image),
       ),
-      onDismissed: (_) => onDelete(),
-      child: Card(
-        margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-        child: ListTile(
-          onTap: onTap,
-          leading: CircleAvatar(
-            backgroundColor: _statusColor(game.status),
-            child: const Icon(Icons.videogame_asset, color: Colors.white),
-          ),
-          title: Text(game.title),
-          subtitle: Text('${game.genre} • ${game.status}'),
-          trailing: game.rating != null
-              ? Text(
-            game.rating!.toStringAsFixed(1),
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          )
-              : null,
+    )
+        : const CircleAvatar(child: Icon(Icons.videogame_asset));
+
+    return Card(
+      child: ListTile(
+        onTap: onTap,
+        leading: leading,
+        title: Text(game.title),
+        subtitle: Text('${game.genre} • ${game.status}'),
+        trailing: IconButton(
+          icon: const Icon(Icons.delete_outline),
+          onPressed: onDelete,
         ),
       ),
     );

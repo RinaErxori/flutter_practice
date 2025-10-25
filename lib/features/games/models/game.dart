@@ -5,6 +5,7 @@ class Game {
   String status;
   double? rating;
   String? comment;
+  String? imageUrl;
 
   Game({
     required this.id,
@@ -13,6 +14,7 @@ class Game {
     required this.status,
     this.rating,
     this.comment,
+    this.imageUrl,
   });
 
   Map<String, dynamic> toJson() => {
@@ -22,6 +24,7 @@ class Game {
     'status': status,
     'rating': rating,
     'comment': comment,
+    'imageUrl': imageUrl,
   };
 
   static Game fromJson(Map<String, dynamic> json) => Game(
@@ -29,7 +32,9 @@ class Game {
     title: json['title'],
     genre: json['genre'],
     status: json['status'],
-    rating: json['rating'] != null ? (json['rating'] as num).toDouble() : null,
+    rating:
+    json['rating'] != null ? (json['rating'] as num).toDouble() : null,
     comment: json['comment'],
+    imageUrl: json['imageUrl'],
   );
 }

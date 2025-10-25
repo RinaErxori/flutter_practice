@@ -1,11 +1,13 @@
-import 'games/models/game.dart';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'games/models/game.dart';
 import 'games/screens/add_edit_game_screen.dart';
 import 'games/screens/game_detail_screen.dart';
 import 'games/widgets/game_card.dart';
 
 class GameContainer extends StatefulWidget {
-  const GameContainer({Key? key}) : super(key: key);
+  const GameContainer({super.key});
 
   @override
   State<GameContainer> createState() => _GameContainerState();
@@ -13,120 +15,133 @@ class GameContainer extends StatefulWidget {
 
 class _GameContainerState extends State<GameContainer>
     with SingleTickerProviderStateMixin {
-  final List<String> statuses = const ['Все', 'Хочу пройти', 'Играю', 'Пройдено'];
-  late final TabController _tabs;
-  final List<Game> _games = [
-    Game(
-      id: '1',
-      title: 'Hollow Knight',
-      genre: 'Metroidvania',
-      status: 'Пройдено',
-      rating: 9.5,
-      comment: 'Атмосферно и сложно!',
-    ),
-    Game(
-      id: '2',
-      title: 'Elden Ring',
-      genre: 'Action RPG',
-      status: 'Играю',
-    ),
-    Game(
-      id: '3',
-      title: 'The Witcher 3',
-      genre: 'RPG',
-      status: 'Хочу пройти',
-    ),
-  ];
+  final statuses = ['Все', 'Хочу пройти', 'Играю', 'Пройдено'];
+  late TabController _tabs;
+  final List<Game> _games = [];
 
   @override
   void initState() {
     super.initState();
     _tabs = TabController(length: statuses.length, vsync: this);
+    _ensureMinFiveGames();
+    _prefetchImages();
   }
 
-  @override
-  void dispose() {
-    _tabs.dispose();
-    super.dispose();
-  }
-
-  List<Game> _filtered(String status) {
-    if (status == 'Все') return _games;
-    return _games.where((g) => g.status == status).toList();
-  }
-
-  void _delete(Game game) {
-    setState(() => _games.removeWhere((g) => g.id == game.id));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Игра удалена'),
-        action: SnackBarAction(
-          label: 'Отменить',
-          onPressed: () => setState(() => _games.add(game)),
-        ),
+  void _ensureMinFiveGames() {
+    if (_games.length >= 5) return;
+    _games.addAll([
+      Game(
+        id: '1',
+        title: 'The Witcher 3',
+        genre: 'RPG',
+        status: 'Пройдено',
+        imageUrl:
+        'https://cdn.pixabay.com/photo/2020/08/06/12/57/character-5467892_1280.jpg',
       ),
-    );
+      Game(
+        id: '2',
+        title: 'Hades',
+        genre: 'Roguelike',
+        status: 'Играю',
+        imageUrl:
+        'https://cdn.cloudflare.steamstatic.com/steam/apps/1145360/header.jpg',
+      ),
+      Game(
+        id: '3',
+        title: 'Celeste',
+        genre: 'Platformer',
+        status: 'Хочу пройти',
+        imageUrl:
+        'https://cdn.cloudflare.steamstatic.com/steam/apps/504230/header.jpg',
+      ),
+      Game(
+        id: '4',
+        title: 'Hollow Knight',
+        genre: 'Metroidvania',
+        status: 'Пройдено',
+        imageUrl:
+        'https://cdn.cloudflare.steamstatic.com/steam/apps/367520/header.jpg',
+      ),
+      Game(
+        id: '5',
+        title: 'Portal 2',
+        genre: 'Puzzle',
+        status: 'Пройдено',
+        imageUrl:
+        'https://cdn.cloudflare.steamstatic.com/steam/apps/620/header.jpg',
+      ),
+    ]);
   }
 
-  Future<void> _add() async {
-    final result = await Navigator.push<Game?>(
-      context,
-      MaterialPageRoute(builder: (_) => AddEditGameScreen()),
-    );
-    if (result != null) setState(() => _games.add(result));
-  }
-
-  Future<void> _edit(Game game) async {
-    final result = await Navigator.push<Game?>(
-      context,
-      MaterialPageRoute(builder: (_) => AddEditGameScreen(game: game)),
-    );
-    if (result != null) {
-      setState(() {
-        final i = _games.indexWhere((g) => g.id == result.id);
-        if (i != -1) _games[i] = result;
-      });
+  Future<void> _prefetchImages() async {
+    final manager = DefaultCacheManager();
+    for (final g in _games) {
+      if (g.imageUrl != null) {
+        try {
+          await manager.downloadFile(g.imageUrl!);
+        } catch (_) {}
+      }
     }
   }
 
-  Future<void> _detail(Game game) async {
-    final action = await Navigator.push<String?>(
+  List<Game> _filtered(String s) =>
+      s == 'Все' ? _games : _games.where((g) => g.status == s).toList();
+
+  void _add() async {
+    final res = await Navigator.push<Game?>(
       context,
-      MaterialPageRoute(builder: (_) => GameDetailScreen(game: game)),
+      MaterialPageRoute(builder: (_) => const AddEditGameScreen()),
     );
-    if (action == 'edit') _edit(game);
-    if (action == 'delete') _delete(game);
+    if (res != null) setState(() => _games.add(res));
   }
+
+  void _delete(Game g) => setState(() => _games.remove(g));
+  void _detail(Game g) => Navigator.push(
+      context, MaterialPageRoute(builder: (_) => GameDetailScreen(game: g)));
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('GameTracker'),
+        title: const Text('Учёт игр'),
         bottom: TabBar(
           controller: _tabs,
           isScrollable: true,
           tabs: statuses.map((s) => Tab(text: s)).toList(),
         ),
       ),
-      body: TabBarView(
-        controller: _tabs,
-        children: statuses.map((status) {
-          final list = _filtered(status);
-          if (list.isEmpty) return const Center(child: Text('Нет игр'));
-          return ListView.builder(
-            itemCount: list.length,
-            itemBuilder: (_, i) => GameCard(
-              game: list[i],
-              onTap: () => _detail(list[i]),
-              onDelete: () => _delete(list[i]),
+      body: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            color: Colors.blue.shade50,
+            padding: const EdgeInsets.all(8),
+            child: const Text(
+              'Изображения кэшируются и доступны офлайн',
+              textAlign: TextAlign.center,
             ),
-          );
-        }).toList(),
+          ),
+          Expanded(
+            child: TabBarView(
+              controller: _tabs,
+              children: statuses.map((s) {
+                final list = _filtered(s);
+                if (list.isEmpty) return const Center(child: Text('Нет игр'));
+                return ListView.builder(
+                  itemCount: list.length,
+                  itemBuilder: (_, i) => GameCard(
+                    game: list[i],
+                    onTap: () => _detail(list[i]),
+                    onDelete: () => _delete(list[i]),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _add,
-        tooltip: 'Добавить игру',
         child: const Icon(Icons.add),
       ),
     );

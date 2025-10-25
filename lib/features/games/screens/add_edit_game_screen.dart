@@ -3,7 +3,7 @@ import '../models/game.dart';
 
 class AddEditGameScreen extends StatefulWidget {
   final Game? game;
-  const AddEditGameScreen({this.game});
+  const AddEditGameScreen({super.key, this.game});
 
   @override
   State<AddEditGameScreen> createState() => _AddEditGameScreenState();
@@ -11,45 +11,51 @@ class AddEditGameScreen extends StatefulWidget {
 
 class _AddEditGameScreenState extends State<AddEditGameScreen> {
   final _formKey = GlobalKey<FormState>();
-  late String _title, _genre, _status;
-  double _rating = 0;
-  String? _comment;
-  final _statuses = ['Хочу пройти', 'Играю', 'Пройдено'];
+  late TextEditingController _title, _genre, _comment, _imageUrl;
+  double? _rating;
+  String _status = 'Хочу пройти';
+
+  final statuses = const ['Хочу пройти', 'Играю', 'Пройдено'];
 
   @override
   void initState() {
     super.initState();
     final g = widget.game;
-    _title = g?.title ?? '';
-    _genre = g?.genre ?? '';
-    _status = g?.status ?? 'Хочу пройти';
-    _rating = g?.rating ?? 0;
-    _comment = g?.comment;
+    _title = TextEditingController(text: g?.title ?? '');
+    _genre = TextEditingController(text: g?.genre ?? '');
+    _comment = TextEditingController(text: g?.comment ?? '');
+    _imageUrl = TextEditingController(text: g?.imageUrl ?? '');
+    _rating = g?.rating;
+    _status = g?.status ?? _status;
+  }
+
+  @override
+  void dispose() {
+    _title.dispose();
+    _genre.dispose();
+    _comment.dispose();
+    _imageUrl.dispose();
+    super.dispose();
   }
 
   void _save() {
     if (!_formKey.currentState!.validate()) return;
-    _formKey.currentState!.save();
-    final id = widget.game?.id ?? DateTime.now().millisecondsSinceEpoch.toString();
-    final game = Game(
-      id: id,
-      title: _title,
-      genre: _genre,
+    final newGame = Game(
+      id: widget.game?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      title: _title.text,
+      genre: _genre.text,
       status: _status,
       rating: _rating,
-      comment: _comment,
+      comment: _comment.text,
+      imageUrl: _imageUrl.text,
     );
-    Navigator.pop(context, game);
+    Navigator.pop(context, newGame);
   }
 
   @override
   Widget build(BuildContext context) {
-    final isEdit = widget.game != null;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(isEdit ? 'Редактировать игру' : 'Добавить игру'),
-        actions: [IconButton(icon: const Icon(Icons.check), onPressed: _save)],
-      ),
+      appBar: AppBar(title: const Text('Добавить / редактировать игру')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -57,48 +63,34 @@ class _AddEditGameScreenState extends State<AddEditGameScreen> {
           child: ListView(
             children: [
               TextFormField(
-                initialValue: _title,
+                controller: _title,
                 decoration: const InputDecoration(labelText: 'Название'),
                 validator: (v) =>
-                (v == null || v.trim().isEmpty) ? 'Введите название' : null,
-                onSaved: (v) => _title = v!.trim(),
+                v == null || v.isEmpty ? 'Введите название' : null,
               ),
-              const SizedBox(height: 12),
               TextFormField(
-                initialValue: _genre,
+                controller: _genre,
                 decoration: const InputDecoration(labelText: 'Жанр'),
-                onSaved: (v) => _genre = v?.trim() ?? '',
               ),
-              const SizedBox(height: 12),
               DropdownButtonFormField<String>(
                 value: _status,
-                decoration: const InputDecoration(labelText: 'Статус'),
-                items: _statuses
+                items: statuses
                     .map((s) => DropdownMenuItem(value: s, child: Text(s)))
                     .toList(),
                 onChanged: (v) => setState(() => _status = v!),
+                decoration: const InputDecoration(labelText: 'Статус'),
               ),
-              const SizedBox(height: 20),
-              Text(
-                'Рейтинг: ${_rating.toStringAsFixed(1)}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              Slider(
-                min: 0,
-                max: 10,
-                divisions: 20,
-                label: _rating.toStringAsFixed(1),
-                value: _rating,
-                onChanged: (v) => setState(() => _rating = v),
-              ),
-              const SizedBox(height: 20),
               TextFormField(
-                initialValue: _comment,
+                controller: _imageUrl,
+                decoration:
+                const InputDecoration(labelText: 'Ссылка на обложку'),
+              ),
+              TextFormField(
+                controller: _comment,
                 decoration: const InputDecoration(labelText: 'Комментарий'),
                 maxLines: 3,
-                onSaved: (v) => _comment = v?.trim(),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               ElevatedButton.icon(
                 onPressed: _save,
                 icon: const Icon(Icons.save),
