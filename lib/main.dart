@@ -1,23 +1,24 @@
 import 'package:flutter/material.dart';
-import 'features/games/screens/game_list_screen.dart';
+import 'features/games/services/game_service.dart';
+import 'features/app_router.dart';
 
 void main() {
-  runApp(const GameTrackerApp());
+  final gameService = GameService();
+  runApp(GameTracker(gameService: gameService));
 }
 
-class GameTrackerApp extends StatelessWidget {
-  const GameTrackerApp({Key? key}) : super(key: key);
+class GameTracker extends StatelessWidget {
+  final GameService gameService;
+  const GameTracker({super.key, required this.gameService});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'prack_6',
-      theme: ThemeData(
-        primarySwatch: Colors.deepPurple,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: const GameListScreen(),
+    final router = buildRouter(gameService);
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
+      title: 'Games',
+      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.indigo),
+      routerConfig: router,
     );
   }
 }
