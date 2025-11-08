@@ -1,99 +1,55 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import '../models/game.dart';
 import '../services/game_service.dart';
+import 'game_list_screen.dart';
 
-class AddEditGameScreen extends StatefulWidget {
+class AddEditGameScreen extends StatelessWidget {
   final GameService gameService;
   const AddEditGameScreen({super.key, required this.gameService});
 
   @override
-  State<AddEditGameScreen> createState() => _AddEditGameScreenState();
-}
-
-class _AddEditGameScreenState extends State<AddEditGameScreen> {
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _genreController = TextEditingController();
-
-  Future<void> _navigateToGames() async {
-    await Future.delayed(const Duration(seconds: 2));
-    if (mounted) {
-      context.go('/');
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final titleController = TextEditingController();
+    final genreController = TextEditingController();
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Добавить игру'),
+        title: const Text('Добавить/Редактировать игру'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+          onPressed: () => Navigator.pop(context),
         ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextField(
-              controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: 'Название игры',
-                border: OutlineInputBorder(),
-              ),
-            ),
+            TextField(controller: titleController, decoration: const InputDecoration(labelText: 'Название игры')),
+            const SizedBox(height: 8),
+            TextField(controller: genreController, decoration: const InputDecoration(labelText: 'Жанр игры')),
             const SizedBox(height: 16),
-            TextField(
-              controller: _genreController,
-              decoration: const InputDecoration(
-                labelText: 'Жанр игры',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Center(
-              child: ElevatedButton.icon(
-                onPressed: () async {
-                  if (_titleController.text.trim().isEmpty ||
-                      _genreController.text.trim().isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Введите название и жанр игры!'),
-                        backgroundColor: Colors.redAccent,
-                      ),
-                    );
-                    return;
-                  }
+            ElevatedButton.icon(
+              onPressed: () {
+                final newGame = Game(
+                  id: DateTime.now().millisecondsSinceEpoch.toString(),
+                  title: titleController.text,
+                  genre: genreController.text,
+                  status: 'Planned',
+                  imageUrl: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/413150/header.jpg',
+                  rating: 0.0,
+                  comment: '',
+                );
+                gameService.addGame(newGame);
 
-                  // Создаём новую игру
-                  final newGame = Game(
-                    id: DateTime.now().millisecondsSinceEpoch.toString(),
-                    title: _titleController.text.trim(),
-                    genre: _genreController.text.trim(),
-                    status: 'Planned',
-                    imageUrl: 'https://picsum.photos/400',
-                    rating: 0.0,
-                    comment: '',
-                  );
-
-                  widget.gameService.addGame(newGame);
-
-                  // Показываем уведомление пользователю
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Игра успешно добавлена! Переход на главный экран...'),
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-
-                  // ⏳ Небольшая задержка и горизонтальный переход
-                  await _navigateToGames();
-                },
-                icon: const Icon(Icons.save),
-                label: const Text('Сохранить игру'),
-              ),
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => GameListScreen(gameService: gameService),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.save),
+              label: const Text('Сохранить игру (горизонтально)'),
             ),
           ],
         ),

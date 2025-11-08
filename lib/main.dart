@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'features/games/services/game_service.dart';
 import 'features/app_router.dart';
+import 'features/games/screens/game_list_screen.dart';
 
 void main() {
   final gameService = GameService();
@@ -9,16 +10,16 @@ void main() {
 
 class GameTracker extends StatelessWidget {
   final GameService gameService;
+
   const GameTracker({super.key, required this.gameService});
 
   @override
   Widget build(BuildContext context) {
-    final router = buildRouter(gameService);
-    return MaterialApp.router(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Games',
       theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.indigo),
-      routerConfig: router,
+      home: GameListScreen(gameService: gameService),
     );
   }
 }

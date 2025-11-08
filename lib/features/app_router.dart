@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'games/services/game_service.dart';
-import 'games/screens/game_list_screen.dart';
-import 'games/screens/add_edit_game_screen.dart';
-import 'games/screens/game_detail_screen.dart';
-import 'games/screens/stats_screen.dart';
-import 'games/screens/settings_screen.dart';
+import 'package:pr2/features/games/screens/game_list_screen.dart';
+import 'package:pr2/features/games/screens/add_edit_game_screen.dart';
+import 'package:pr2/features/games/screens/game_detail_screen.dart';
+import 'package:pr2/features/games/screens/stats_screen.dart';
+import 'package:pr2/features/games/screens/settings_screen.dart';
+import 'package:pr2/features/games/services/game_service.dart';
+import 'package:pr2/features/games//models/game.dart';
 
 GoRouter buildRouter(GameService gameService) {
   return GoRouter(
@@ -23,10 +23,7 @@ GoRouter buildRouter(GameService gameService) {
         builder: (context, state) {
           final id = state.pathParameters['id']!;
           final game = gameService.getById(id);
-          return GameDetailScreen(
-            game: game,
-            gameService: gameService,
-          );
+          return GameDetailScreen(game: game, gameService: gameService);
         },
       ),
       GoRoute(

@@ -9,7 +9,7 @@ class GameService {
       status: 'Playing',
       imageUrl: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1091500/header.jpg',
       rating: 4.8,
-      comment: 'Киберпанковская атмосфера, великолепная графика и саундтрек.',
+      comment: 'Киберпанковская атмосфера и отличный сюжет.',
     ),
     Game(
       id: '2',
@@ -18,7 +18,7 @@ class GameService {
       status: 'Completed',
       imageUrl: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/292030/header.jpg',
       rating: 5.0,
-      comment: 'Одна из лучших RPG всех времён — сюжет, атмосфера, музыка!',
+      comment: 'Одна из лучших RPG всех времён.',
     ),
     Game(
       id: '3',
@@ -27,25 +27,7 @@ class GameService {
       status: 'Planned',
       imageUrl: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1145360/header.jpg',
       rating: 4.6,
-      comment: 'Захватывающий геймплей, визуальный стиль и озвучка!',
-    ),
-    Game(
-      id: '4',
-      title: 'Stardew Valley',
-      genre: 'Simulation / Farming',
-      status: 'Completed',
-      imageUrl: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/413150/header.jpg',
-      rating: 4.9,
-      comment: 'Спокойная и уютная фермерская жизнь с пиксельным шармом.',
-    ),
-    Game(
-      id: '5',
-      title: 'Hollow Knight',
-      genre: 'Metroidvania / Adventure',
-      status: 'Playing',
-      imageUrl: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/367520/header.jpg',
-      rating: 4.7,
-      comment: 'Потрясающий мир, сложные боссы и прекрасная атмосфера одиночества.',
+      comment: 'Интенсивный геймплей и стильная визуализация.',
     ),
   ];
 

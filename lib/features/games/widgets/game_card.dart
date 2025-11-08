@@ -8,17 +8,34 @@ class GameCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.all(8),
-      child: ListTile(
-        leading: Image.network(
-          game.imageUrl,
-          width: 80,
-          height: 80,
-          fit: BoxFit.cover,
-        ),
-        title: Text(game.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text('${game.genre} — ${game.status}'),
-        trailing: Text('⭐ ${game.rating.toStringAsFixed(1)}'),
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      elevation: 4,
+      child: Row(
+        children: [
+          Image.network(
+            game.imageUrl,
+            width: 100,
+            height: 100,
+            fit: BoxFit.cover,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(game.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text('Жанр: ${game.genre}'),
+                Text('Статус: ${game.status}'),
+                Row(
+                  children: [
+                    const Icon(Icons.star, color: Colors.amber, size: 18),
+                    Text(game.rating.toStringAsFixed(1)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1,24 +1,37 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'game_list_screen.dart';
+import '../services/game_service.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
+  void _replaceAfterFrame(BuildContext context, Widget page) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Navigator.of(context, rootNavigator: true).pushReplacement(
+        MaterialPageRoute(builder: (_) => page),
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final gameService = GameService();
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Настройки')),
+      appBar: AppBar(title: const Text('SettingsScreen (Экран 5)')),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('почта admin@gmail.com'),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => context.go('/'),
-              child: const Text('Вернуться на главный экран'),
-            ),
-          ],
+        child: ElevatedButton.icon(
+          onPressed: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Возврат на главный экран...')),
+            );
+            _replaceAfterFrame(
+              context,
+              GameListScreen(gameService: gameService),
+            );
+          },
+          icon: const Icon(Icons.arrow_back),
+          label: const Text('Вернуться на главный экран'),
         ),
       ),
     );

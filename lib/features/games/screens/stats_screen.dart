@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'settings_screen.dart';
 
 class StatsScreen extends StatelessWidget {
   const StatsScreen({super.key});
@@ -7,20 +7,24 @@ class StatsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Статистика игр')),
+      appBar: AppBar(title: const Text('StatsScreen (Экран 4)')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('Экран статистики она скоро будет)'),
-            const SizedBox(height: 16),
+            const Text('Статистика игр'),
             ElevatedButton(
-              onPressed: () => context.go('/settings'),
-              child: const Text('Настройки'),
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                );
+              },
+              child: const Text('Настройки (горизонтально)'),
             ),
             ElevatedButton(
-              onPressed: () => context.pop(),
-              child: const Text('← Назад'),
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Назад (вертикально)'),
             ),
           ],
         ),
