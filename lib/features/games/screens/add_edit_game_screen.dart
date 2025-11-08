@@ -1,103 +1,101 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../models/game.dart';
+import '../services/game_service.dart';
 
 class AddEditGameScreen extends StatefulWidget {
-  final Game? game;
-  const AddEditGameScreen({super.key, this.game});
+  final GameService gameService;
+  const AddEditGameScreen({super.key, required this.gameService});
 
   @override
   State<AddEditGameScreen> createState() => _AddEditGameScreenState();
 }
 
 class _AddEditGameScreenState extends State<AddEditGameScreen> {
-  final _formKey = GlobalKey<FormState>();
-  late TextEditingController _title, _genre, _comment, _imageUrl;
-  double? _rating;
-  String _status = 'Хочу пройти';
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _genreController = TextEditingController();
 
-  final statuses = const ['Хочу пройти', 'Играю', 'Пройдено'];
-
-  @override
-  void initState() {
-    super.initState();
-    final g = widget.game;
-    _title = TextEditingController(text: g?.title ?? '');
-    _genre = TextEditingController(text: g?.genre ?? '');
-    _comment = TextEditingController(text: g?.comment ?? '');
-    _imageUrl = TextEditingController(text: g?.imageUrl ?? '');
-    _rating = g?.rating;
-    _status = g?.status ?? _status;
-  }
-
-  @override
-  void dispose() {
-    _title.dispose();
-    _genre.dispose();
-    _comment.dispose();
-    _imageUrl.dispose();
-    super.dispose();
-  }
-
-  void _save() {
-    if (!_formKey.currentState!.validate()) return;
-    final newGame = Game(
-      id: widget.game?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
-      title: _title.text,
-      genre: _genre.text,
-      status: _status,
-      rating: _rating,
-      comment: _comment.text,
-      imageUrl: _imageUrl.text,
-    );
-    Navigator.pop(context, newGame);
+  Future<void> _navigateToGames() async {
+    await Future.delayed(const Duration(seconds: 2));
+    if (mounted) {
+      context.go('/');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Добавить / редактировать игру')),
+      appBar: AppBar(
+        title: const Text('Добавить игру'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              TextFormField(
-                controller: _title,
-                decoration: const InputDecoration(labelText: 'Название'),
-                validator: (v) =>
-                v == null || v.isEmpty ? 'Введите название' : null,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: _titleController,
+              decoration: const InputDecoration(
+                labelText: 'Название игры',
+                border: OutlineInputBorder(),
               ),
-              TextFormField(
-                controller: _genre,
-                decoration: const InputDecoration(labelText: 'Жанр'),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _genreController,
+              decoration: const InputDecoration(
+                labelText: 'Жанр игры',
+                border: OutlineInputBorder(),
               ),
-              DropdownButtonFormField<String>(
-                value: _status,
-                items: statuses
-                    .map((s) => DropdownMenuItem(value: s, child: Text(s)))
-                    .toList(),
-                onChanged: (v) => setState(() => _status = v!),
-                decoration: const InputDecoration(labelText: 'Статус'),
-              ),
-              TextFormField(
-                controller: _imageUrl,
-                decoration:
-                const InputDecoration(labelText: 'Ссылка на обложку'),
-              ),
-              TextFormField(
-                controller: _comment,
-                decoration: const InputDecoration(labelText: 'Комментарий'),
-                maxLines: 3,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: _save,
+            ),
+            const SizedBox(height: 24),
+            Center(
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  if (_titleController.text.trim().isEmpty ||
+                      _genreController.text.trim().isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Введите название и жанр игры!'),
+                        backgroundColor: Colors.redAccent,
+                      ),
+                    );
+                    return;
+                  }
+
+                  // Создаём новую игру
+                  final newGame = Game(
+                    id: DateTime.now().millisecondsSinceEpoch.toString(),
+                    title: _titleController.text.trim(),
+                    genre: _genreController.text.trim(),
+                    status: 'Planned',
+                    imageUrl: 'https://picsum.photos/400',
+                    rating: 0.0,
+                    comment: '',
+                  );
+
+                  widget.gameService.addGame(newGame);
+
+                  // Показываем уведомление пользователю
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Игра успешно добавлена! Переход на главный экран...'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+
+                  // ⏳ Небольшая задержка и горизонтальный переход
+                  await _navigateToGames();
+                },
                 icon: const Icon(Icons.save),
-                label: const Text('Сохранить'),
+                label: const Text('Сохранить игру'),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
