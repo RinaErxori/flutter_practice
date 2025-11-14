@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import '../models/game.dart';
-import '../services/game_scope.dart';
+import '../services/game_service.dart';
 
 class AddEditGameScreen extends StatefulWidget {
   const AddEditGameScreen({super.key});
@@ -21,7 +22,6 @@ class _AddEditGameScreenState extends State<AddEditGameScreen> {
 
 
   void _save() {
-    final repo = GameScope.read(context).repository;
 
     final game = Game(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -33,8 +33,7 @@ class _AddEditGameScreenState extends State<AddEditGameScreen> {
       comment: _commentController.text.trim(),
     );
 
-    repo.addGame(game);
-    GameScope.read(context).state.notify();
+    GetIt.I<GameService>().addGame(game);
 
     context.go("/");
   }

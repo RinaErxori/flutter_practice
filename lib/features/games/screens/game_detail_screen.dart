@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import '../models/game.dart';
 import '../services/game_scope.dart';
+import '../services/game_service.dart';
 
 class GameDetailScreen extends StatefulWidget {
-  final Game? game;
+  final Game game;
 
   const GameDetailScreen({super.key, required this.game});
 
@@ -22,22 +24,15 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
   }
 
   void _toggleStatus() {
-    if (game == null) return;
+    final repo = GetIt.I<GameService>();
 
-    final scope = GameScope.read(context);
-    final repo = scope.repository;
+    repo.toggleStatus(widget.game.id);
 
-    repo.toggleStatus(game!.id);
+    // Обновляем UI текущего экрана
+    setState(() {});
 
-    scope.state.notify();
-
-    setState(() {
-      game = repo.getById(game!.id);
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Статус изменён на "${game!.status}"')),
-    );
+    // Если нужно вернуться на главный экран:
+    context.go('/');
   }
 
   @override

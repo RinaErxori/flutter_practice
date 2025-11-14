@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'features/games/services/game_scope.dart';
+import "package:get_it/get_it.dart";
+import 'features/games/services/game_service.dart';
 import 'features/app_router.dart';
 
 void main() {
-  runApp(
-    const GameScope(
-      child: GameTracker(),
-    ),
-  );
+  GetIt.I.registerSingleton<GameService>(GameService());
+
+  runApp(const GameTracker());
 }
 
 class GameTracker extends StatelessWidget {
@@ -19,7 +18,7 @@ class GameTracker extends StatelessWidget {
 
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      title: 'Game Tracker',
+      title: 'Games',
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.indigo,

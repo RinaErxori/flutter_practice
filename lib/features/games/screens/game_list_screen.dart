@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import '../services/game_scope.dart';
+import 'package:get_it/get_it.dart';
+import '../services/game_service.dart';
 import '../widgets/game_card.dart';
 import '../models/game.dart';
+import 'package:go_router/go_router.dart';
 
 class GameListScreen extends StatefulWidget {
   const GameListScreen({super.key});
@@ -12,12 +13,11 @@ class GameListScreen extends StatefulWidget {
 }
 
 class _GameListScreenState extends State<GameListScreen> {
-  final TextEditingController _searchController = TextEditingController();
+  final _searchController = TextEditingController();
 
   List<Game> _filteredGames() {
+    final repo = GetIt.I<GameService>();
     final query = _searchController.text.toLowerCase();
-    final repo = GameScope.of(context).repository;
-
     return repo.games
         .where((g) => g.title.toLowerCase().contains(query))
         .toList();
@@ -28,10 +28,7 @@ class _GameListScreenState extends State<GameListScreen> {
     final games = _filteredGames();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Игры"),
-      ),
-
+      appBar: AppBar(title: const Text('Игры')),
       body: Column(
         children: [
           Padding(
@@ -39,19 +36,14 @@ class _GameListScreenState extends State<GameListScreen> {
             child: TextField(
               controller: _searchController,
               onChanged: (_) => setState(() {}),
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: 'Поиск по названию...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                prefixIcon: Icon(Icons.search),
               ),
             ),
           ),
-
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.all(12),
               itemCount: games.length,
               itemBuilder: (context, index) {
                 final game = games[index];
