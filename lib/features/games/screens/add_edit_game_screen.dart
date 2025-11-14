@@ -1,25 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../models/game.dart';
-import '../services/game_service.dart';
+import '../services/game_scope.dart';
 
 class AddEditGameScreen extends StatefulWidget {
-  final GameService gameService;
-  const AddEditGameScreen({super.key, required this.gameService});
+  const AddEditGameScreen({super.key});
 
   @override
   State<AddEditGameScreen> createState() => _AddEditGameScreenState();
 }
 
 class _AddEditGameScreenState extends State<AddEditGameScreen> {
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _genreController = TextEditingController();
+  final _titleController = TextEditingController();
+  final _genreController = TextEditingController();
+  final _imageController = TextEditingController();
+  final _ratingController = TextEditingController();
+  final _commentController = TextEditingController();
 
-  Future<void> _navigateToGames() async {
-    await Future.delayed(const Duration(seconds: 2));
-    if (mounted) {
-      context.go('/');
-    }
+  String _selectedStatus = 'Planned';
+
+
+  void _save() {
+    final repo = GameScope.read(context).repository;
+
+    final game = Game(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      title: _titleController.text.trim(),
+      genre: _genreController.text.trim(),
+      status: _selectedStatus,
+      imageUrl: _imageController.text.trim(),
+      rating: double.tryParse(_ratingController.text) ?? 0,
+      comment: _commentController.text.trim(),
+    );
+
+    repo.addGame(game);
+    GameScope.read(context).state.notify();
+
+    context.go("/");
   }
 
   @override
@@ -29,74 +46,52 @@ class _AddEditGameScreenState extends State<AddEditGameScreen> {
         title: const Text('Добавить игру'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+          onPressed: () => context.go("/"),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.save),
+            onPressed: _save,
+          ),
+        ],
       ),
-      body: Padding(
+
+      body: ListView(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: 'Название игры',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _genreController,
-              decoration: const InputDecoration(
-                labelText: 'Жанр игры',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Center(
-              child: ElevatedButton.icon(
-                onPressed: () async {
-                  if (_titleController.text.trim().isEmpty ||
-                      _genreController.text.trim().isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Введите название и жанр игры!'),
-                        backgroundColor: Colors.redAccent,
-                      ),
-                    );
-                    return;
-                  }
+        children: [
+          TextField(
+            controller: _titleController,
+            decoration: const InputDecoration(labelText: 'Название'),
+          ),
+          TextField(
+            controller: _genreController,
+            decoration: const InputDecoration(labelText: 'Жанр'),
+          ),
+          TextField(
+            controller: _imageController,
+            decoration: const InputDecoration(labelText: 'URL картинки'),
+          ),
+          TextField(
+            controller: _ratingController,
+            decoration: const InputDecoration(labelText: 'Рейтинг'),
+          ),
+          TextField(
+            controller: _commentController,
+            decoration: const InputDecoration(labelText: 'Комментарий'),
+          ),
 
-                  // Создаём новую игру
-                  final newGame = Game(
-                    id: DateTime.now().millisecondsSinceEpoch.toString(),
-                    title: _titleController.text.trim(),
-                    genre: _genreController.text.trim(),
-                    status: 'Planned',
-                    imageUrl: 'https://picsum.photos/400',
-                    rating: 0.0,
-                    comment: '',
-                  );
+          const SizedBox(height: 20),
 
-                  widget.gameService.addGame(newGame);
-
-                  // Показываем уведомление пользователю
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Игра успешно добавлена! Переход на главный экран...'),
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-
-                  // ⏳ Небольшая задержка и горизонтальный переход
-                  await _navigateToGames();
-                },
-                icon: const Icon(Icons.save),
-                label: const Text('Сохранить игру'),
-              ),
-            ),
-          ],
-        ),
+          DropdownButtonFormField<String>(
+            value: _selectedStatus,
+            items: const [
+              DropdownMenuItem(value: 'Planned', child: Text('Запланировано')),
+              DropdownMenuItem(value: 'Playing', child: Text('Играю')),
+              DropdownMenuItem(value: 'Completed', child: Text('Пройдено')),
+            ],
+            onChanged: (v) => setState(() => _selectedStatus = v!),
+          ),
+        ],
       ),
     );
   }

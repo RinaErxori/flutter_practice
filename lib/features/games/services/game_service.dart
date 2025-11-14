@@ -49,7 +49,7 @@ class GameService {
     ),
   ];
 
-  List<Game> getAllGames() => _games;
+  List<Game> get games => _games;
 
   void addGame(Game game) => _games.add(game);
 
@@ -75,6 +75,7 @@ class GameService {
     if (game == null) return;
 
     String newStatus;
+
     switch (game.status) {
       case 'Playing':
         newStatus = 'Completed';
@@ -99,5 +100,9 @@ class GameService {
         comment: game.comment,
       ),
     );
+  }
+
+  void deleteCompleted() {
+    _games.removeWhere((g) => g.status == 'Completed');
   }
 }
