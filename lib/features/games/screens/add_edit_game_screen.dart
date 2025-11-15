@@ -1,56 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:get_it/get_it.dart';
+import '../stores/add_game/add_game_store.dart';
 import 'package:go_router/go_router.dart';
-import '../models/game.dart';
-import '../services/game_service.dart';
 
-class AddEditGameScreen extends StatefulWidget {
+class AddEditGameScreen extends StatelessWidget {
   const AddEditGameScreen({super.key});
 
   @override
-  State<AddEditGameScreen> createState() => _AddEditGameScreenState();
-}
-
-class _AddEditGameScreenState extends State<AddEditGameScreen> {
-  final _titleController = TextEditingController();
-  final _genreController = TextEditingController();
-  final _imageController = TextEditingController();
-  final _ratingController = TextEditingController();
-  final _commentController = TextEditingController();
-
-  String _selectedStatus = 'Planned';
-
-
-  void _save() {
-
-    final game = Game(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      title: _titleController.text.trim(),
-      genre: _genreController.text.trim(),
-      status: _selectedStatus,
-      imageUrl: _imageController.text.trim(),
-      rating: double.tryParse(_ratingController.text) ?? 0,
-      comment: _commentController.text.trim(),
-    );
-
-    GetIt.I<GameService>().addGame(game);
-
-    context.go("/");
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final store = GetIt.I<AddGameStore>();
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Добавить игру'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go("/"),
-        ),
+        title: const Text("Добавить игру"),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.save),
-            onPressed: _save,
+          Observer(
+            builder: (_) => IconButton(
+              icon: const Icon(Icons.save),
+              onPressed: store.canSave
+                  ? () {
+                store.save();
+                context.go('/');
+              }
+                  : null,
+            ),
           ),
         ],
       ),
@@ -59,36 +33,38 @@ class _AddEditGameScreenState extends State<AddEditGameScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           TextField(
-            controller: _titleController,
             decoration: const InputDecoration(labelText: 'Название'),
+            onChanged: store.setTitle,
           ),
           TextField(
-            controller: _genreController,
             decoration: const InputDecoration(labelText: 'Жанр'),
+            onChanged: store.setGenre,
           ),
           TextField(
-            controller: _imageController,
-            decoration: const InputDecoration(labelText: 'URL картинки'),
+            decoration: const InputDecoration(labelText: 'URL обложки'),
+            onChanged: store.setImageUrl,
           ),
           TextField(
-            controller: _ratingController,
             decoration: const InputDecoration(labelText: 'Рейтинг'),
+            keyboardType: TextInputType.number,
+            onChanged: store.setRating,
           ),
           TextField(
-            controller: _commentController,
             decoration: const InputDecoration(labelText: 'Комментарий'),
+            onChanged: store.setComment,
           ),
 
-          const SizedBox(height: 20),
-
-          DropdownButtonFormField<String>(
-            value: _selectedStatus,
-            items: const [
-              DropdownMenuItem(value: 'Planned', child: Text('Запланировано')),
-              DropdownMenuItem(value: 'Playing', child: Text('Играю')),
-              DropdownMenuItem(value: 'Completed', child: Text('Пройдено')),
-            ],
-            onChanged: (v) => setState(() => _selectedStatus = v!),
+          const SizedBox(height: 16),
+          Observer(
+            builder: (_) => DropdownButton<String>(
+              value: store.status,
+              items: const [
+                DropdownMenuItem(value: 'Planned', child: Text("Запланировано")),
+                DropdownMenuItem(value: 'Playing', child: Text("Играю")),
+                DropdownMenuItem(value: 'Completed', child: Text("Пройдено")),
+              ],
+              onChanged: (v) => store.setStatus(v!),
+            ),
           ),
         ],
       ),

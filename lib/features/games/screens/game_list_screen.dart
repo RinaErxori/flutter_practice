@@ -1,55 +1,66 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import '../services/game_service.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import '../stores/game_list/game_list_store.dart';
 import '../widgets/game_card.dart';
-import '../models/game.dart';
 import 'package:go_router/go_router.dart';
 
-class GameListScreen extends StatefulWidget {
+class GameListScreen extends StatelessWidget {
   const GameListScreen({super.key});
 
   @override
-  State<GameListScreen> createState() => _GameListScreenState();
-}
-
-class _GameListScreenState extends State<GameListScreen> {
-  final _searchController = TextEditingController();
-
-  List<Game> _filteredGames() {
-    final repo = GetIt.I<GameService>();
-    final query = _searchController.text.toLowerCase();
-    return repo.games
-        .where((g) => g.title.toLowerCase().contains(query))
-        .toList();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final games = _filteredGames();
+    final store = GetIt.I<GameListStore>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Игры')),
+      appBar: AppBar(
+        title: const Text('Игры'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.done),
+            tooltip: "Завершённые игры",
+            onPressed: () => context.go('/completed'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.equalizer),
+            tooltip: "Статистика",
+            onPressed: () => context.go("/stats"),
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: "Настройки",
+            onPressed: () => context.go('/settings'),
+          ),
+        ],
+      ),
+
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(12),
             child: TextField(
-              controller: _searchController,
-              onChanged: (_) => setState(() {}),
               decoration: const InputDecoration(
-                hintText: 'Поиск по названию...',
+                hintText: 'Поиск...',
                 prefixIcon: Icon(Icons.search),
               ),
+              onChanged: store.setSearch,
             ),
           ),
+
           Expanded(
-            child: ListView.builder(
-              itemCount: games.length,
-              itemBuilder: (context, index) {
-                final game = games[index];
-                return GestureDetector(
-                  onTap: () => context.push('/detail/${game.id}'),
-                  child: GameCard(game: game),
+            child: Observer(
+              builder: (_) {
+                final games = store.filtered;
+
+                return ListView.builder(
+                  itemCount: games.length,
+                  itemBuilder: (context, index) {
+                    final game = games[index];
+                    return GestureDetector(
+                      onTap: () => context.go('/detail/${game.id}'),
+                      child: GameCard(game: game),
+                    );
+                  },
                 );
               },
             ),
@@ -57,36 +68,10 @@ class _GameListScreenState extends State<GameListScreen> {
         ],
       ),
 
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton.extended(
-            onPressed: () => context.go('/completed'),
-            icon: const Icon(Icons.done),
-            label: const Text('Завершённые'),
-          ),
-          const SizedBox(height: 12),
-
-          FloatingActionButton.extended(
-            onPressed: () => context.go('/add'),
-            icon: const Icon(Icons.add),
-            label: const Text('Добавить'),
-          ),
-          const SizedBox(height: 12),
-
-          FloatingActionButton.extended(
-            onPressed: () => context.go('/stats'),
-            icon: const Icon(Icons.bar_chart),
-            label: const Text('Статистика'),
-          ),
-          const SizedBox(height: 12),
-
-          FloatingActionButton.extended(
-            onPressed: () => context.go('/settings'),
-            icon: const Icon(Icons.settings),
-            label: const Text('Настройки'),
-          ),
-        ],
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.go('/add'),
+        tooltip: "Добавить игру",
+        child: const Icon(Icons.add),
       ),
     );
   }

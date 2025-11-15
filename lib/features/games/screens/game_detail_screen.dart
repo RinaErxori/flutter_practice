@@ -1,98 +1,62 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
-import '../models/game.dart';
-import '../services/game_scope.dart';
-import '../services/game_service.dart';
+import '../stores/game_detail/game_detail_store.dart';
 
 class GameDetailScreen extends StatefulWidget {
-  final Game game;
-
-  const GameDetailScreen({super.key, required this.game});
+  final String id;
+  const GameDetailScreen({super.key, required this.id});
 
   @override
   State<GameDetailScreen> createState() => _GameDetailScreenState();
 }
 
 class _GameDetailScreenState extends State<GameDetailScreen> {
-  late Game? game;
+  late final GameDetailStore store;
 
   @override
   void initState() {
     super.initState();
-    game = widget.game;
-  }
-
-  void _toggleStatus() {
-    final repo = GetIt.I<GameService>();
-
-    repo.toggleStatus(widget.game.id);
-
-    // Обновляем UI текущего экрана
-    setState(() {});
-
-    // Если нужно вернуться на главный экран:
-    context.go('/');
+    store = GetIt.I<GameDetailStore>();
+    store.load(widget.id);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (game == null) {
-      return const Scaffold(
-        body: Center(child: Text('Игра не найдена')),
-      );
-    }
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text(game!.title),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go("/"),
-        ),
-      ),
+      appBar: AppBar(title: const Text("Информация об игре"),
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () => context.go("/"),
+      )),
 
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.network(
-                game!.imageUrl,
-                height: 200,
-                width: double.infinity,
-                fit: BoxFit.cover,
+      body: Observer(
+        builder: (_) {
+          final game = store.game;
+          if (game == null) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              Image.network(game.imageUrl, height: 200, fit: BoxFit.cover),
+              const SizedBox(height: 16),
+              Text(game.title, style: const TextStyle(fontSize: 24)),
+              Text("Жанр: ${game.genre}"),
+              Text("Статус: ${game.status}"),
+              Text("Рейтинг: ${game.rating}"),
+
+              const SizedBox(height: 20),
+
+              ElevatedButton(
+                onPressed: () => store.toggleStatus(),
+                child: const Text("Сменить статус"),
               ),
-            ),
-
-            const SizedBox(height: 16),
-
-            Text(
-              game!.title,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-
-            const SizedBox(height: 8),
-
-            Chip(label: Text(game!.status)),
-
-            const SizedBox(height: 16),
-
-            Text('Жанр: ${game!.genre}', style: const TextStyle(fontSize: 18)),
-
-            const SizedBox(height: 16),
-
-            ElevatedButton.icon(
-              onPressed: _toggleStatus,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Сменить статус'),
-            ),
-          ],
-        ),
+            ],
+          );
+        },
       ),
     );
   }
