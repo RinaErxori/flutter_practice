@@ -29,6 +29,12 @@ abstract class _AccountStore with Store {
   bool isAuthorized = false;
 
   @computed
+  bool get canEditProfile =>
+      currentUser != null &&
+      email.isNotEmpty &&
+      username.isNotEmpty;
+
+  @computed
   bool get isLoggedIn => currentUser != null;
 
   @computed
@@ -88,5 +94,16 @@ abstract class _AccountStore with Store {
     logStore.logAction('Выход пользователя ${currentUser?.email ?? ''}', category: 'account');
     currentUser = null;
     isAuthorized = false;
+  }
+
+  @action
+  void updateProfile({required String newEmail, required String newUsername}) {
+    if (currentUser == null) return;
+    if (newEmail.isEmpty || newUsername.isEmpty) return;
+
+    currentUser = User(email: newEmail, username: newUsername);
+    email = newEmail;
+    username = newUsername;
+    logStore.logAction('Обновлён профиль $newEmail', category: 'account');
   }
 }

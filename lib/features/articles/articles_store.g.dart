@@ -63,6 +63,30 @@ mixin _$ArticlesStore on _ArticlesStore, Store {
   }
 
   @override
+  void addArticle(String title, String summary, String body) {
+    final _$actionInfo = _$_ArticlesStoreActionController.startAction(
+      name: '_ArticlesStore.addArticle',
+    );
+    try {
+      return super.addArticle(title, summary, body);
+    } finally {
+      _$_ArticlesStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void updateArticle(String id, String title, String summary, String body) {
+    final _$actionInfo = _$_ArticlesStoreActionController.startAction(
+      name: '_ArticlesStore.updateArticle',
+    );
+    try {
+      return super.updateArticle(id, title, summary, body);
+    } finally {
+      _$_ArticlesStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 articles: ${articles},

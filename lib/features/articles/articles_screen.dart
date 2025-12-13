@@ -3,6 +3,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'articles_store.dart';
+import 'models/article.dart';
 
 class ArticlesScreen extends StatelessWidget {
   const ArticlesScreen({super.key});
@@ -176,6 +177,5 @@ Future<void> _showArticleDialog(BuildContext context, ArticlesStore store, {Arti
   );
 
   if (result == true) {
-    // обновление произойдёт через MobX
   }
 }

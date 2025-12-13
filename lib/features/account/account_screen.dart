@@ -180,6 +180,9 @@ class _ProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final emailCtrl = TextEditingController(text: store.currentUser?.email ?? '');
+    final usernameCtrl = TextEditingController(text: store.currentUser?.username ?? '');
+
     return Card(
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -199,6 +202,38 @@ class _ProfileCard extends StatelessWidget {
                   'Онлайн',
                   style: TextStyle(color: Colors.green.shade800),
                 ),
+              ),
+            ),
+            const Divider(),
+            TextField(
+              controller: emailCtrl,
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                prefixIcon: Icon(Icons.alternate_email),
+              ),
+              onChanged: store.setEmail,
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: usernameCtrl,
+              decoration: const InputDecoration(
+                labelText: 'Никнейм',
+                prefixIcon: Icon(Icons.person_outline),
+              ),
+              onChanged: store.setUsername,
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: store.canEditProfile
+                    ? () => store.updateProfile(
+                          newEmail: emailCtrl.text.trim(),
+                          newUsername: usernameCtrl.text.trim(),
+                        )
+                    : null,
+                icon: const Icon(Icons.save_outlined),
+                label: const Text('Сохранить изменения'),
               ),
             ),
             const Divider(),

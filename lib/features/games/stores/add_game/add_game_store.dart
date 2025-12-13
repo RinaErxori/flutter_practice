@@ -2,6 +2,8 @@ import 'package:mobx/mobx.dart';
 import 'package:get_it/get_it.dart';
 import '../../models/game.dart';
 import '../../services/game_service.dart';
+import '../../../activity/activity_log_store.dart';
+import '../../../notes/games_notes_store.dart';
 
 part 'add_game_store.g.dart';
 
@@ -9,6 +11,7 @@ class AddGameStore = _AddGameStore with _$AddGameStore;
 
 abstract class _AddGameStore with Store {
   final service = GetIt.I<GameService>();
+  final logStore = GetIt.I<ActivityLogStore>();
 
   @observable
   String title = '';
@@ -63,5 +66,7 @@ abstract class _AddGameStore with Store {
     );
 
     service.addGame(game);
+    logStore.logAction('Добавлена игра $title', category: 'games');
+    GetIt.I<GamesNotesStore>().refreshGames();
   }
 }
